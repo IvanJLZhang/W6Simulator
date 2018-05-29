@@ -22,28 +22,105 @@ namespace W6Simulator.Command
 {
     public class Message
     {
-        //public const string SPLIT_CHR = ",";
-        //// 显示器信息
-        //public const string MSG = "MSG";
 
-        //// 驱动档案信息
-        //public const string MODEL_INFO = "MODEL_INFO";
-        //public const string IMPORT_INFO = "IMPORT_INFO";
-        //public const string SCPLIST_INFO = "SCPLIST_INFO";
+        protected internal const byte FRAME_STX_BYTE = 0x02;
+        protected internal const byte FRAME_DEST_BYTE = 0x80;
+        protected internal const byte FRAME_ETX_BYTE = 0x03;
 
-        //// 模块版本
-        //// 网络信息
-        //// 时间设置
-        //// 重启
-        //// 驱动档案下载
-        //// TCP 连接检查
-        //// KEY 遥控
-        //// 电压/电流
-        //// RCV LOG
-        //// REMOTE
-        //// FILE
+        public string CommandType { get; private set; }
+        public IList<string> ParamList { get; private set; }
+        public string MessageContext => ToString();
+        public string MessageType { get; private set; }
 
-        public string CommandType;
-        public IList<string> ParamList;
+        public Encoding Encoding { get; set; } = Encoding.UTF8;
+        private byte[] _messageData;
+        /// <summary>
+        /// 解析消息时的构造方法
+        /// </summary>
+        /// <param name="messageData">消息的byte数组</param>
+        public Message(byte[] messageData)
+        {
+            _messageData = messageData;
+            MessageType = "RECV";
+            Parse();
+        }
+        /// <summary>
+        /// 解析消息时的构造方法
+        /// </summary>
+        /// <param name="messageContext">字符串消息</param>
+        public Message(string messageContext)
+        {
+            var messageArr = messageContext.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            CommandType = messageArr[0];
+            ParamList = messageArr.Skip(1).ToArray();
+            MessageType = "SEND";
+        }
+        /// <summary>
+        /// 新建消息时的构造方法
+        /// </summary>
+        /// <param name="commandType"></param>
+        /// <param name="paramList"></param>
+        public Message(string commandType, IList<string> paramList)
+        {
+            CommandType = commandType;
+            ParamList = paramList;
+            MessageType = "SEND";
+            Encode();
+        }
+        private string Parse()
+        {
+            if (_messageData == null || _messageData.Length <= 0)
+                return String.Empty;
+            if (_messageData[0] == FRAME_STX_BYTE &&
+                _messageData[1] == FRAME_DEST_BYTE &&
+                _messageData[_messageData.Length - 1] == FRAME_ETX_BYTE)
+            {
+                byte[] lengthBytes = _messageData.Skip(2).Take(4).ToArray();
+                var messageLength = Convert.ToInt32(Encoding.GetString(lengthBytes), 16);// Int32.Parse("0x" + Encoding.GetString(lengthBytes));// 数据的长度
+                                                                                         // 需要减去FRAME_STX_BYTE的1byte，FRAME_DEST_BYTE的1byte，FRAME_ETX_BYTE的1byte和数据长度的4byte长度
+                byte[] dataBytes = _messageData.Skip(2 + 4).Take(_messageData.Length - 2 - 4 - 1).ToArray();
+                var messageStr = Encoding.GetString(dataBytes);
+                if (messageStr.Length == messageLength)
+                {
+                    var messageArr = messageStr.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                    CommandType = messageArr[0];
+                    ParamList = messageArr.Skip(1).ToArray();
+                }
+                else
+                {
+                    throw new InvalidOperationException("Wrong Message format");
+                }
+            }
+            else
+            {
+                throw new InvalidOperationException("Wrong Message format");
+            }
+
+            return String.Empty;
+        }
+
+        private byte[] Encode()
+        {
+            if (CommandType == String.Empty)
+                return new byte[] { };
+            string messageStr = this.ToString();
+            byte[] messageBytes = Encoding.GetBytes(messageStr.Length.ToString("X4") + messageStr);
+            byte[] data = new byte[messageBytes.Length + 3];
+            data[0] = FRAME_STX_BYTE;
+            data[1] = FRAME_DEST_BYTE;
+            Buffer.BlockCopy(messageBytes, 0, data, 2, messageBytes.Length);
+            data[data.Length - 1] = FRAME_ETX_BYTE;
+            return _messageData = data;
+        }
+
+        public override string ToString()
+        {
+            StringBuilder stringBuilder = new StringBuilder(CommandType);
+            foreach (var item in ParamList)
+            {
+                stringBuilder.Append("," + item);
+            }
+            return stringBuilder.ToString();
+        }
     }
 }

@@ -17,6 +17,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Granda.GAEE.Core", "Granda.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Granda.IZ.CodeDom", "Granda.IZ.CodeDom\Granda.IZ.CodeDom.csproj", "{175EE16F-8804-4D52-A0A4-AE994CEEBDFA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "W6SimulatorTests", "W6SimulatorTests\W6SimulatorTests.csproj", "{9F296F7C-7F75-489A-8CD3-CBFC77AE16A0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTest", "UnitTest\UnitTest.csproj", "{A6CC9FE3-169C-48AD-B0C1-707F69D6588C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -47,6 +51,14 @@ Global
 		{175EE16F-8804-4D52-A0A4-AE994CEEBDFA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{175EE16F-8804-4D52-A0A4-AE994CEEBDFA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{175EE16F-8804-4D52-A0A4-AE994CEEBDFA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9F296F7C-7F75-489A-8CD3-CBFC77AE16A0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9F296F7C-7F75-489A-8CD3-CBFC77AE16A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9F296F7C-7F75-489A-8CD3-CBFC77AE16A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9F296F7C-7F75-489A-8CD3-CBFC77AE16A0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A6CC9FE3-169C-48AD-B0C1-707F69D6588C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A6CC9FE3-169C-48AD-B0C1-707F69D6588C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A6CC9FE3-169C-48AD-B0C1-707F69D6588C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A6CC9FE3-169C-48AD-B0C1-707F69D6588C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -7,9 +7,10 @@
              mc:Ignorable="d" 
              >
     <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Margin="2, 2,2,2">
-        <TextBlock 
+        <TextBlock
             x:Name="tbl_clock"
-            Text=""
-                   />
+            Text="{Binding Path=Clocker, UpdateSourceTrigger=PropertyChanged, StringFormat={}{0:yyyy-MM-dd HH:mm:ss}}"
+            >
+        </TextBlock>
     </Grid>
 </UserControl>

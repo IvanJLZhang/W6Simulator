@@ -24,16 +24,16 @@ namespace Granda.GAEE.Core.Variables
     /// <summary>
     /// Parameters 变量
     /// </summary>
-    public class Parameters : Variable
+    public class ParameterVariable : Variable
     {
         #region IList相关
-        private Parameters[] _items;
-        private static readonly Parameters[] emptyArray = new Parameters[0];
+        private ParameterVariable[] _items;
+        private static readonly ParameterVariable[] emptyArray = new ParameterVariable[0];
         private int _size = 0;
         /// <summary>
         /// ctor
         /// </summary>
-        public Parameters()
+        public ParameterVariable()
         {
             _items = emptyArray;
         }
@@ -42,7 +42,7 @@ namespace Granda.GAEE.Core.Variables
         /// </summary>
         /// <param name="index"></param>
         /// <returns></returns>
-        public Parameters this[int index]
+        public ParameterVariable this[int index]
         {
             get
             {
@@ -50,7 +50,23 @@ namespace Granda.GAEE.Core.Variables
             }
         }
 
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public Variable this[string key]
+        {
+            get
+            {
+                foreach (ParameterVariable item in _items)
+                {
+                    if (item.Name.Equals(key, StringComparison.OrdinalIgnoreCase))
+                        return item;
+                }
+                return null;
+            }
+        }
         /// <summary>
         /// List的长度
         /// </summary>
@@ -60,7 +76,7 @@ namespace Granda.GAEE.Core.Variables
         /// 将新的item添加至列表末尾处
         /// </summary>
         /// <param name="item"></param>
-        public void Add(Parameters item)
+        public void Add(ParameterVariable item)
         {
             if (_size == _items.Length) EnsureCapacity(_size + 1);
             this._items[this._size++] = item;
@@ -95,7 +111,7 @@ namespace Granda.GAEE.Core.Variables
                 {
                     if (value > 0)
                     {
-                        Parameters[] mewItems = new Parameters[value];
+                        ParameterVariable[] mewItems = new ParameterVariable[value];
                         if (_size > 0)
                         {
                             Array.Copy(_items, 0, mewItems, 0, _size);

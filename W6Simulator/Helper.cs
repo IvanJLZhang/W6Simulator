@@ -44,23 +44,23 @@ namespace W6Simulator
         /// </summary>
         /// <param name="receivedMessage"></param>
         /// <returns></returns>
-        public static Message ParseMessage(this string receivedMessage)
-        {
-            if (String.IsNullOrEmpty(receivedMessage))
-                return null;
-            Message message = new Message();
-            var valueArr = receivedMessage.Split(',');
-            if (valueArr.Length <= 0)
-                return null;
-            message.CommandType = valueArr[0];
-            List<String> paramList = new List<string>();
-            for (int index = 1; index < valueArr.Length; index++)
-            {
-                paramList.Add(valueArr[index]);
-            }
-            message.ParamList = paramList;
-            return message;
-        }
+        //public static Message ParseMessage(this string receivedMessage)
+        //{
+        //    if (String.IsNullOrEmpty(receivedMessage))
+        //        return null;
+        //    Message message = new Message();
+        //    var valueArr = receivedMessage.Split(',');
+        //    if (valueArr.Length <= 0)
+        //        return null;
+        //    message.CommandType = valueArr[0];
+        //    List<String> paramList = new List<string>();
+        //    for (int index = 1; index < valueArr.Length; index++)
+        //    {
+        //        paramList.Add(valueArr[index]);
+        //    }
+        //    message.ParamList = paramList;
+        //    return message;
+        //}
 
         /// <summary>
         /// 获取类下面所有public方法

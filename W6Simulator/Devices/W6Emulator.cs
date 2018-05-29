@@ -131,13 +131,11 @@ namespace W6Simulator.Devices
         }
         #endregion
 
-        protected const byte FRAME_STX_BYTE = 0x02;
-        protected const byte FRAME_DEST_BYTE = 0x80;
-        protected const byte FRAME_ETX_BYTE = 0x03;
-        protected readonly string FRAME_STX = Encoding.UTF8.GetString(new byte[] { FRAME_STX_BYTE });
-        protected readonly string FRAME_ETX = Encoding.UTF8.GetString(new byte[] { FRAME_ETX_BYTE });
-
+        protected internal readonly string MSG_REMOTE_FUNCTION_END_GOOD = "REMOTE,LINE,END,GOOD";
+        protected internal readonly string MSG_REMOTE_FUNCTION_END_NG = "REMOTE,LINE,END,NG";
         private readonly AsyncTcpClient asyncTcpClient = null;
+
+        public event Action<object, Message> MessageSent;
 
         public W6Emulator(AsyncTcpClient asyncTcpClient)
         {
@@ -151,10 +149,15 @@ namespace W6Simulator.Devices
             {
                 case "WPM":
                     return WPM_DOWNLOAD(message);
+                case "REMOTE":
+                    return REMOTE(message);
+                case "KEY":
+                    return KEY_CONTROL(message);
                 default:
-                    break;
+                    var replyParamList = message.ParamList.ToList();
+                    replyParamList.Add("OK");
+                    return SendMsgToServer(new Message(message.CommandType, replyParamList));
             }
-            return false;
         }
 
         private void AsyncTcpClient_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -230,29 +233,35 @@ namespace W6Simulator.Devices
         {
             if (!message.CommandType.Equals("KEY"))
                 return false;
-            var function = message.ParamList[0];
-            switch (function)
-            {
-                case "RESET":
-                    break;
-                case "ENTER":
-                    break;
-                case "BACK":
-                    break;
-                case "NEXT":
-                    break;
-                case "FUNC":
-                    break;
-                case "UP":
-                    break;
-                case "AUTO":
-                    break;
-                case "DOWN":
-                    break;
-                default:
-                    break;
-            }
-            return true;
+
+            var replyParamList = message.ParamList.ToList();
+            replyParamList.Add("OK");
+
+            return SendMsgToServer(new Message(message.CommandType, replyParamList));
+
+            //var function = message.ParamList[0];
+            //switch (function)
+            //{
+            //    case "RESET":
+            //        break;
+            //    case "ENTER":
+
+            //        break;
+            //    case "BACK":
+            //        break;
+            //    case "NEXT":
+            //        break;
+            //    case "FUNC":
+            //        break;
+            //    case "UP":
+            //        break;
+            //    case "AUTO":
+            //        break;
+            //    case "DOWN":
+            //        break;
+            //    default:
+            //        break;
+            //}
         }
         /// <summary>
         /// RCV LOG
@@ -286,27 +295,24 @@ namespace W6Simulator.Devices
         {
             if (!message.CommandType.Equals("REMOTE"))
                 return false;
-            var function = message.ParamList[0];
-            switch (function)
-            {
-                case "ITEM":
-                    break;
-                default:
-                    break;
-            }
-            return true;
+            Message replyMessage = new Message(MSG_REMOTE_FUNCTION_END_GOOD);
+            return SendMsgToServer(replyMessage);
         }
 
         #region FILE
 
         #endregion
 
-        private Queue<byte[]> msgs2send = new Queue<byte[]>();
+        private Queue<Message> msgs2send = new Queue<Message>();
 
         private bool SendMsgToServer(string message)
         {
-            var data = GetPgFrameW6(message);
-            msgs2send?.Enqueue(data);
+            return SendMsgToServer(new Message(message));
+        }
+
+        private bool SendMsgToServer(Message message)
+        {
+            msgs2send?.Enqueue(message);
             return true;
         }
         /// <summary>
@@ -318,6 +324,7 @@ namespace W6Simulator.Devices
         /// </summary>
         private void SendThreadFunc()
         {
+            Trace.WriteLine("Open send data tunnel");
             lock (this.asyncTcpClient)
             {
                 while (this.asyncTcpClient.Connected)
@@ -329,7 +336,8 @@ namespace W6Simulator.Devices
                             var data = msgs2send.Dequeue();
                             if (data != null)
                             {
-                                this.asyncTcpClient.Send(data);
+                                this.asyncTcpClient.Send(data.MessageContext);
+                                MessageSent?.Invoke(this, data);
                             }
                         }
                         catch (Exception ex)
@@ -346,21 +354,6 @@ namespace W6Simulator.Devices
         public void Reset()
         {
             msgs2send.Clear();
-        }
-        /// <summary>
-        /// 将命令字符串封装成字节数组形式的 W6 PG通讯数据帧
-        /// </summary>
-        /// <param name="cmd"></param>
-        /// <returns></returns>
-        private byte[] GetPgFrameW6(string cmd)
-        {
-            byte[] bts = Encoding.UTF8.GetBytes(cmd.Length.ToString("X4") + cmd);
-            byte[] frame = new byte[bts.Length + 3];
-            frame[0] = FRAME_STX_BYTE;
-            frame[1] = FRAME_DEST_BYTE;
-            Buffer.BlockCopy(bts, 0, frame, 2, bts.Length);
-            frame[frame.Length - 1] = FRAME_ETX_BYTE;
-            return frame;
         }
     }
 }

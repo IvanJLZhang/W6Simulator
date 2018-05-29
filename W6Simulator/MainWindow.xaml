@@ -15,7 +15,8 @@
         </Grid.RowDefinitions>
         <Menu Grid.Row="0" Margin="0, 0, 0, 3">
             <MenuItem Header="File">
-                <MenuItem Header="Exit" Click="MenuItem_Click"/>
+                <MenuItem Header="New A Device" Click="MenuItem_Click_1"/>
+                <MenuItem Header="Exit" Click="MenuItem_Click" ToolTip="退出所有Device的运行"/>
             </MenuItem>
             <MenuItem Header="Edit">
 
@@ -32,12 +33,13 @@
         <local:MyClock x:Name="myClock" Grid.Row="3" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Bottom"/>
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition/>
-                <ColumnDefinition/>
-                <ColumnDefinition/>
-                <ColumnDefinition/>
-                <ColumnDefinition/>
-                <ColumnDefinition/>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="1*"/>
+
             </Grid.ColumnDefinitions>
             <Viewbox Grid.Column="0" HorizontalAlignment="Left" >
                 <TextBlock Text="IP:"/>
@@ -52,7 +54,7 @@
                 <TextBox Text="{Binding Settings.Port, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding ElementName=btn_start, Path=IsEnabled}"/>
             </Viewbox>
             <Viewbox Grid.Column="4" >
-                <Button x:Name="btn_start" Content="START" Cursor="Hand" Click="Button_Click"/>
+                <Button x:Name="btn_start" Content="START" Cursor="Hand" Click="Button_Click" IsEnabled="{Binding Path=Settings.Disconnected, UpdateSourceTrigger=PropertyChanged}"/>
             </Viewbox>
             <Viewbox Grid.Column="5">
                 <TextBlock Text="{Binding Settings.Connection, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
@@ -67,11 +69,11 @@
                        >
                 <ListBoxItem Content="Hello"/>
             </ListBox>
-            <ListView x:Name="lv_logmsg" Grid.Column="1">
+            <ListView x:Name="lv_logmsg" Grid.Column="1" ItemsSource="{Binding Path=MessageList, UpdateSourceTrigger=Default}">
                 <ListView.View>
                     <GridView>
-                        <GridViewColumn Header="MSG" DisplayMemberBinding="{Binding Path=Message}" Width="500"/>
-                        <GridViewColumn Header="Type" DisplayMemberBinding="{Binding Path=MessageType}"/>
+                        <GridViewColumn Header="MSG" DisplayMemberBinding="{Binding Path=MessageContext}" Width="500"/>
+                        <GridViewColumn Header="Type" DisplayMemberBinding="{Binding Path=MessageType}" Width="50"/>
                     </GridView>
                 </ListView.View>
             </ListView>

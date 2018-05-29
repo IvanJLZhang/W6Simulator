@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Granda.GAEE.Core.StepSettings;
+using Granda.GAEE.Core.Variables;
 
 namespace Granda.GAEE.Core
 {
@@ -39,6 +40,14 @@ namespace Granda.GAEE.Core
         /// 补充说明
         /// </summary>
         public string Comment { get; set; }
+        /// <summary>
+        /// 本地变量
+        /// </summary>
+        public LocalsVariable Locals { get; set; }
+        /// <summary>
+        /// 本地参数列表
+        /// </summary>
+        public ParameterVariable Parameters { get; set; }
 
         public abstract void Run();
     }

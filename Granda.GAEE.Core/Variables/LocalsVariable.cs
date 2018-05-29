@@ -26,18 +26,18 @@ namespace Granda.GAEE.Core.Variables
     /// <summary>
     /// Locals 变量
     /// </summary>
-    public class Locals : Variable
+    public class LocalsVariable : Variable
     {
         List<Variable> ResultList = new List<Variable>();
 
         #region IList相关
-        private Locals[] _items;
-        private static readonly Locals[] emptyArray = new Locals[0];
+        private LocalsVariable[] _items;
+        private static readonly LocalsVariable[] emptyArray = new LocalsVariable[0];
         private int _size = 0;
         /// <summary>
         /// ctor
         /// </summary>
-        public Locals()
+        public LocalsVariable()
         {
             _items = emptyArray;
         }
@@ -62,7 +62,7 @@ namespace Granda.GAEE.Core.Variables
         {
             get
             {
-                foreach (Locals item in _items)
+                foreach (LocalsVariable item in _items)
                 {
                     if (item.Name.Equals(key, StringComparison.OrdinalIgnoreCase))
                         return item;
@@ -79,7 +79,7 @@ namespace Granda.GAEE.Core.Variables
         /// 将新的item添加至列表末尾处
         /// </summary>
         /// <param name="item"></param>
-        public void Add(Locals item)
+        public void Add(LocalsVariable item)
         {
             if (_size == _items.Length) EnsureCapacity(_size + 1);
             this._items[this._size++] = item;
@@ -114,7 +114,7 @@ namespace Granda.GAEE.Core.Variables
                 {
                     if (value > 0)
                     {
-                        Locals[] mewItems = new Locals[value];
+                        LocalsVariable[] mewItems = new LocalsVariable[value];
                         if (_size > 0)
                         {
                             Array.Copy(_items, 0, mewItems, 0, _size);
@@ -134,8 +134,6 @@ namespace Granda.GAEE.Core.Variables
         public ICollection<object> Values => throw new NotImplementedException();
 
         public bool IsReadOnly => throw new NotImplementedException();
-
-        public object this[string key] { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         ///// <summary>
         ///// 将新的item添加至列表末尾处

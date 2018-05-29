@@ -24,13 +24,13 @@ namespace W6Simulator
 {
     public class Settings : INotifyPropertyChanged
     {
-        private string _ipAddress = "192.168.200.200";
-        private int _port = 5000;
+        private string _ipAddress = "192.168.0.45";
+        private int _port = 50000;
         private bool _isTcpCommunication = true;
         private bool _isRs232 = false;
 
         public event PropertyChangedEventHandler PropertyChanged;
-        public string DeviceTypeStr => this.DeviceType.ToString() + " Emulator";
+        public string DeviceTypeStr => this.DeviceType.ToString() + " Emulator: " + DeviceIndex;
         public DeviceType DeviceType { get; private set; } = DeviceType.W6;
         /// <summary>
         /// 
@@ -75,7 +75,21 @@ namespace W6Simulator
                 if (value != _connection)
                 {
                     _connection = value;
+                    Disconnected = value == "Disconnect";
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Connection)));
+                }
+            }
+        }
+        private bool _disconnected = true;
+        public bool Disconnected
+        {
+            get => _disconnected;
+            set
+            {
+                if (value != _disconnected)
+                {
+                    _disconnected = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Disconnected)));
                 }
             }
         }
@@ -110,6 +124,8 @@ namespace W6Simulator
                 }
             }
         }
+
+        public int DeviceIndex { get; internal set; } = 1;
         #endregion
     }
 }

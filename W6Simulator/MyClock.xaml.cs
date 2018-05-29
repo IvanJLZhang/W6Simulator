@@ -25,18 +25,17 @@ namespace W6Simulator
         public MyClock()
         {
             InitializeComponent();
-            this.tbl_clock.Text = Now;
             this.Loaded += MyClock_Loaded;
         }
 
         private void MyClock_Loaded(object sender, RoutedEventArgs e)
         {
+            this.DataContext = this;
             clockTimer = new Timer((obj) =>
             {
                 this.Dispatcher.BeginInvoke(new Action(() =>
                 {
                     Clocker = Clocker.AddSeconds(1);
-                    this.tbl_clock.Text = Now;
                 }), DispatcherPriority.Normal, null);
             }, null, 0, 1000);
         }
@@ -45,9 +44,19 @@ namespace W6Simulator
         {
             Clocker = clocker;
         }
-        public DateTime Clocker { get; set; } = DateTime.Now;
+
+        public DateTime Clocker
+        {
+            get => _clocker;
+            set
+            {
+                _clocker = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Clocker)));
+            }
+        }
 
         Timer clockTimer;
+        private DateTime _clocker = DateTime.Now;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
