@@ -27,7 +27,7 @@ using W6Simulator.Model;
 
 namespace W6Simulator.Devices
 {
-    public class W6Emulator
+    public class W6Emulator : TCPCOMMODE
     {
         #region 不错的想法， 有待继续深入研究
         static Encoding Encoding { get; set; } = Encoding.ASCII;
@@ -133,17 +133,46 @@ namespace W6Simulator.Devices
 
         protected internal readonly string MSG_REMOTE_FUNCTION_END_GOOD = "REMOTE,LINE,END,GOOD";
         protected internal readonly string MSG_REMOTE_FUNCTION_END_NG = "REMOTE,LINE,END,NG";
-        private readonly AsyncTcpClient asyncTcpClient = null;
 
-        public event Action<object, Message> MessageSent;
+        protected internal readonly string MSG_ALIVE = "ALIVE";
+        internal const string MSG_MEASURE_PV = "MEASURE,PV";
+        protected internal readonly string MSG_MEASURE_SET = "MEASURE,SET";
 
-        public W6Emulator(AsyncTcpClient asyncTcpClient)
+        private bool _outputEnabled = false;
+
+        Timer MesuareTimer;
+
+        public W6Emulator(AsyncTcpClient asyncTcpClient) : base(asyncTcpClient)
         {
-            this.asyncTcpClient = asyncTcpClient;
-            this.asyncTcpClient.PropertyChanged += AsyncTcpClient_PropertyChanged;
+            MesuareTimer = new Timer(new TimerCallback(Mesuare), null, Timeout.Infinite, Timeout.Infinite);
+        }
+        /// <summary>
+        /// MEASURE,PV,3.802V,0.000V,1.801V,3.000V,3.300V,2.800V, 1.0mA, 0.0mA, 0.0mA, 0.0mA, 0.0mA, 0.0mA
+        /// </summary>
+        /// <param name="sender"></param>
+        void Mesuare(object sender)
+        {
+            StringBuilder stringBuilder = new StringBuilder(MSG_MEASURE_PV);
+            for (int index = 0; index < 6; index++)
+            {
+                stringBuilder.Append("," + GenerateRandomValue(5) + "V");
+            }
+
+            for (int index = 0; index < 6; index++)
+            {
+                stringBuilder.Append("," + GenerateRandomValue(1) + "mA");
+            }
+
+            Message replyMessage = new Message(stringBuilder.ToString());
+            SendMsgToServer(replyMessage);
         }
 
-        public bool HandleMessage(Message message)
+        Random random = new Random((Int32)DateTime.Now.Ticks);
+        string GenerateRandomValue(int max_value)
+        {
+            return (random.NextDouble() * max_value).ToString("0.000");
+        }
+        public override bool HandleMessage(Message message)
         {
             switch (message.CommandType)
             {
@@ -153,19 +182,12 @@ namespace W6Simulator.Devices
                     return REMOTE(message);
                 case "KEY":
                     return KEY_CONTROL(message);
+                case "MODEL_INFO":
+                    return MODEL_INFO(message);
                 default:
                     var replyParamList = message.ParamList.ToList();
                     replyParamList.Add("OK");
                     return SendMsgToServer(new Message(message.CommandType, replyParamList));
-            }
-        }
-
-        private void AsyncTcpClient_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName.Equals(nameof(this.asyncTcpClient.Connected)))
-            {
-                if (this.asyncTcpClient.Connected)
-                    OpenSendTunnel();
             }
         }
 
@@ -237,31 +259,35 @@ namespace W6Simulator.Devices
             var replyParamList = message.ParamList.ToList();
             replyParamList.Add("OK");
 
+            var function = message.ParamList[0];
+            switch (function)
+            {
+                case "RESET":
+                    MesuareTimer.Change(Timeout.Infinite, Timeout.Infinite);
+                    break;
+                case "ENTER":
+
+                    break;
+                case "BACK":
+                    break;
+                case "NEXT":
+                    MesuareTimer.Change(1000, 1000);
+                    break;
+                case "FUNC":
+                    break;
+                case "UP":
+                    break;
+                case "AUTO":
+                    break;
+                case "DOWN":
+                    break;
+                default:
+                    break;
+            }
+
             return SendMsgToServer(new Message(message.CommandType, replyParamList));
 
-            //var function = message.ParamList[0];
-            //switch (function)
-            //{
-            //    case "RESET":
-            //        break;
-            //    case "ENTER":
 
-            //        break;
-            //    case "BACK":
-            //        break;
-            //    case "NEXT":
-            //        break;
-            //    case "FUNC":
-            //        break;
-            //    case "UP":
-            //        break;
-            //    case "AUTO":
-            //        break;
-            //    case "DOWN":
-            //        break;
-            //    default:
-            //        break;
-            //}
         }
         /// <summary>
         /// RCV LOG
@@ -299,61 +325,12 @@ namespace W6Simulator.Devices
             return SendMsgToServer(replyMessage);
         }
 
-        #region FILE
-
-        #endregion
-
-        private Queue<Message> msgs2send = new Queue<Message>();
-
-        private bool SendMsgToServer(string message)
+        public bool MODEL_INFO(Message message)
         {
-            return SendMsgToServer(new Message(message));
-        }
-
-        private bool SendMsgToServer(Message message)
-        {
-            msgs2send?.Enqueue(message);
-            return true;
-        }
-        /// <summary>
-        /// 打开发送信息通道
-        /// </summary>
-        private void OpenSendTunnel() => Task.Factory.StartNew(() => SendThreadFunc());
-        /// <summary>
-        /// 发送信息线程方法
-        /// </summary>
-        private void SendThreadFunc()
-        {
-            Trace.WriteLine("Open send data tunnel");
-            lock (this.asyncTcpClient)
-            {
-                while (this.asyncTcpClient.Connected)
-                {
-                    if (msgs2send.Count > 0)
-                    {
-                        try
-                        {
-                            var data = msgs2send.Dequeue();
-                            if (data != null)
-                            {
-                                this.asyncTcpClient.Send(data.MessageContext);
-                                MessageSent?.Invoke(this, data);
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            Trace.WriteLine(ex);
-                        }
-                    }
-                    else
-                        Thread.Sleep(200);
-                }
-            }
-        }
-
-        public void Reset()
-        {
-            msgs2send.Clear();
+            if (!message.CommandType.Equals("MODEL_INFO"))
+                return false;
+            Message replyMessage = new Message(" MODEL_INFO,TEST_DIR,TEST.wsc,2.6.52,SYSTEM.LIB,DISPLAY.LIB,TOUCH.LIB");
+            return SendMsgToServer(replyMessage);
         }
     }
 }

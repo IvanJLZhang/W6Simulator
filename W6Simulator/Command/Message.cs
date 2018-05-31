@@ -67,14 +67,14 @@ namespace W6Simulator.Command
             MessageType = "SEND";
             Encode();
         }
-        private string Parse()
+        private Message Parse()
         {
             if (_messageData == null || _messageData.Length <= 0)
-                return String.Empty;
+                return null;
             if (_messageData[0] == FRAME_STX_BYTE &&
                 _messageData[1] == FRAME_DEST_BYTE &&
                 _messageData[_messageData.Length - 1] == FRAME_ETX_BYTE)
-            {
+            {// 按照消息结构解析
                 byte[] lengthBytes = _messageData.Skip(2).Take(4).ToArray();
                 var messageLength = Convert.ToInt32(Encoding.GetString(lengthBytes), 16);// Int32.Parse("0x" + Encoding.GetString(lengthBytes));// 数据的长度
                                                                                          // 需要减去FRAME_STX_BYTE的1byte，FRAME_DEST_BYTE的1byte，FRAME_ETX_BYTE的1byte和数据长度的4byte长度
@@ -85,6 +85,7 @@ namespace W6Simulator.Command
                     var messageArr = messageStr.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
                     CommandType = messageArr[0];
                     ParamList = messageArr.Skip(1).ToArray();
+                    return this;
                 }
                 else
                 {
@@ -92,14 +93,16 @@ namespace W6Simulator.Command
                 }
             }
             else
-            {
-                throw new InvalidOperationException("Wrong Message format");
+            {// 直接解析为文本字符串
+                var messageStr = Encoding.GetString(_messageData);
+                var messageArr = messageStr.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                CommandType = messageArr[0];
+                ParamList = messageArr.Skip(1).ToArray();
+                return this;
             }
-
-            return String.Empty;
         }
 
-        private byte[] Encode()
+        public byte[] Encode()
         {
             if (CommandType == String.Empty)
                 return new byte[] { };

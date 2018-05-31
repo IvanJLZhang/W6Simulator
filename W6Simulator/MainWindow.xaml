@@ -63,13 +63,12 @@
         <Grid Grid.Row="2" Margin="0,10,0,10">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1*"/>
-                <ColumnDefinition Width="3*"/>
             </Grid.ColumnDefinitions>
-            <ListBox x:Name="lv_cmdList" Grid.Column="0" 
+            <!--<ListBox x:Name="lv_cmdList" Grid.Column="0" 
                        >
                 <ListBoxItem Content="Hello"/>
-            </ListBox>
-            <ListView x:Name="lv_logmsg" Grid.Column="1" ItemsSource="{Binding Path=MessageList, UpdateSourceTrigger=Default}">
+            </ListBox>-->
+            <ListView x:Name="lv_logmsg" Grid.Column="0" ItemsSource="{Binding Path=MessageList, UpdateSourceTrigger=Default}">
                 <ListView.View>
                     <GridView>
                         <GridViewColumn Header="MSG" DisplayMemberBinding="{Binding Path=MessageContext}" Width="500"/>

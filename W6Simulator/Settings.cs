@@ -24,7 +24,7 @@ namespace W6Simulator
 {
     public class Settings : INotifyPropertyChanged
     {
-        private string _ipAddress = "192.168.0.45";
+        private string _ipAddress = "192.168.200.200";
         private int _port = 50000;
         private bool _isTcpCommunication = true;
         private bool _isRs232 = false;
@@ -81,6 +81,12 @@ namespace W6Simulator
             }
         }
         private bool _disconnected = true;
+
+        public Settings(DeviceType deviceType)
+        {
+            DeviceType = deviceType;
+        }
+
         public bool Disconnected
         {
             get => _disconnected;
